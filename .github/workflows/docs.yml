@@ -1,0 +1,35 @@
+name: Docs
+on:
+  push:
+    branches:
+      - gh-pages
+permissions:
+  id-token: write
+  pages: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1'
+          bundler-cache: 'true'
+          cache-version: 0
+      - run: |
+          npm install
+          bundle exec jekyll build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site/'
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
